@@ -7,7 +7,7 @@
 	'summary': 'Jinchatsh Customize',
 	'description': """Jinchatsh Customize""",
 	'license': "OPL-1",
-	'depends': ['account', 'base', 'sale'],
+	'depends': ['account', 'base', 'sale','purchase'],
 	'data': [
 
 	],

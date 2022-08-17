@@ -163,25 +163,25 @@ class ReportAccountAgedPartnerCustomize(models.AbstractModel):
                     move.invoice_date AS invoice_date,
                     move.invoice_date_due as invoice_date_due,
                     journal.code AS journal_code,
-                    
+
                     COALESCE(SUM(part_debit.amount_currency), 0) AS amount_paid,
                     (account_move_line.amount_currency - COALESCE(SUM(part_debit.amount_currency), 0)) AS amount_residual,
-                    
-                    
+
+
                      CASE WHEN (account_move_line.amount_currency+COALESCE(SUM(part_debit.amount_currency), 0)) != 0
                     THEN (account_move_line.amount_currency - COALESCE(SUM(part_debit.amount_currency), 0))/COALESCE(curr_rate.rate, 1)
                     ELSE (ROUND(account_move_line.balance - COALESCE(SUM(part_debit.amount), 0) + COALESCE(SUM(part_credit.amount), 0), currency_table.precision))
                     END AS amount_total_hkd,   
-                            
-                                            
+
+
                     COALESCE(SUM(part_debit.amount), 0) AS part_debit_amount,
                     COALESCE(SUM(part_credit.amount), 0) AS part_credit_amount,
-                    
+
                     ROUND(account_move_line.balance - COALESCE(SUM(part_debit.amount), 0) + COALESCE(SUM(part_credit.amount), 0), currency_table.precision) AS amount_check,
-                    
+
                     COALESCE(so.name, move.ref) AS order_no,
                     curr_rate.rate AS currency_rate,
-                    
+
                     account.code || ' ' || account.name AS account_name,
                     account.code AS account_code,""" + ','.join([("""
                     CASE WHEN period_table.period_index = {i}
@@ -346,12 +346,12 @@ class ReportAccountAgedPayableCustomize(models.Model):
 
                         COALESCE(SUM(part_debit.amount), 0) AS part_debit_amount,
                         COALESCE(SUM(part_credit.amount), 0) AS part_credit_amount,
-                        
+
                         ROUND(account_move_line.balance - COALESCE(SUM(part_debit.amount), 0) + COALESCE(SUM(part_credit.amount), 0), 0) AS amount_check,
-                        
+
                         COALESCE(so.name, move.ref) AS order_no,
                         curr_rate.rate AS currency_rate,
-                        
+
                         account.code || ' ' || account.name AS account_name,
                         account.code AS account_code,""" + ','.join([("""
                         CASE WHEN period_table.period_index = {i}
@@ -379,7 +379,7 @@ class ReportAccountAgedPayableCustomize(models.Model):
                         FROM res_currency_rate cr_c1
                         WHERE cr_c1.currency_id = account_move_line.currency_id
                         AND cr_c1.name <= %(date)s
-                        ORDER BY cr_c1.name DESC 
+                        ORDER BY cr_c1.name DESC
                         LIMIT 1
                     ) curr_rate ON account_move_line.currency_id = curr_rate.currency_id
                     LEFT JOIN LATERAL (
@@ -388,7 +388,7 @@ class ReportAccountAgedPayableCustomize(models.Model):
                         WHERE part.max_date <= %(date)s
                     ) part_debit ON part_debit.debit_move_id = account_move_line.id
                     LEFT JOIN LATERAL (
-                        SELECT part.amount, part.credit_move_id, part.debit_amount_currency AS amount_currency
+                        SELECT part.amount, part.credit_move_id, part.credit_amount_currency AS amount_currency
                         FROM account_partial_reconcile part
                         WHERE part.max_date <= %(date)s
                     ) part_credit ON part_credit.credit_move_id = account_move_line.id
@@ -402,7 +402,7 @@ class ReportAccountAgedPayableCustomize(models.Model):
                     )
                     WHERE account.internal_type = %(account_type)s
                     GROUP BY account_move_line.id, partner.id, trust_property.id, journal.id, move.id, account.id,
-                             period_table.period_index, currency_table.rate, currency_table.precision, 
+                             period_table.period_index, currency_table.rate, currency_table.precision,
                              so.id,
                              curr_rate.rate
                     HAVING ROUND(account_move_line.amount_currency - COALESCE(SUM(part_debit.amount_currency), 0) + COALESCE(SUM(part_credit.amount_currency), 0), 0) != 0

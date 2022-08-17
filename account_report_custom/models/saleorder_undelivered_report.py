@@ -36,6 +36,8 @@ class ReportSaleOrderUndelivered(models.Model):
 
     amount_currency = fields.Monetary(currency_field='currency_id')
     amount = fields.Monetary(currency_field='currency_id')
+    discount = fields.Float()
+
 
     outstanding_quantity = fields.Float()
     outstanding_currency = fields.Monetary(currency_field='currency_id')
@@ -78,39 +80,43 @@ class ReportSaleOrderUndelivered(models.Model):
                 0 AS debit, 
                 0 AS credit, 
                 0 AS balance,
-                
+
                 1 AS analytic_tag_ids,
                 sale_order_line.create_date AS create_date,
                 sale_order_line.write_date AS write_date,
                 sale_order_line.write_uid AS write_uid,
                 sale_order_line.create_uid AS create_uid,
-                
+
                 sale_order_line.id,
                 sale_order_line.order_id,
                 sale_order_line.product_id,
                 sale_order_line.product_uom_qty AS quantity,
                 sale_order_line.qty_delivered AS shipped_quantity,
                 sale_order_line.price_unit AS unit_price,
+                sale_order_line.discount AS discount,
                 sale_order_line.price_total AS amount_currency,
-                
+
                 CASE WHEN curr_rate.rate > 0
                 THEN (sale_order_line.price_total/curr_rate.rate)
                 ELSE sale_order_line.price_total END AS amount,
-                
+
                 (sale_order_line.product_uom_qty - sale_order_line.qty_delivered) AS outstanding_quantity,
                 (sale_order_line.product_uom_qty - sale_order_line.qty_delivered) * ((100 - COALESCE(sale_order_line.discount, 0)) / 100 * sale_order_line.price_unit) AS outstanding_currency,
-                
+
                 CASE WHEN curr_rate.rate > 0
                 THEN (sale_order_line.product_uom_qty - sale_order_line.qty_delivered) * ((100 - COALESCE(sale_order_line.discount, 0)) / 100 * sale_order_line.price_unit) / curr_rate.rate
                 ELSE (sale_order_line.product_uom_qty - sale_order_line.qty_delivered) * ((100 - COALESCE(sale_order_line.discount, 0)) / 100 * sale_order_line.price_unit) END AS outstanding_amount,
-                
+
                 prodtem.name AS product_code,
                 so.name AS order_no,
-                
-                CASE WHEN curr_rate.rate > 0 THEN curr_rate.name ELSE 'HKD' END AS currency_name,
-                CASE WHEN curr_rate.rate > 0 THEN curr_rate.symbol ELSE '$' END AS currency_symbol,
-                CASE WHEN curr_rate.rate > 0 THEN curr_rate.rate ELSE 1 END AS currency_rate,
-                
+
+                CASE WHEN curr_rate.rate > 0 THEN curr_rate.name ELSE 'HKD' END 
+                AS currency_name,
+                CASE WHEN curr_rate.rate > 0 THEN curr_rate.symbol ELSE '$' END 
+                AS currency_symbol,
+                CASE WHEN curr_rate.rate > 0 THEN curr_rate.rate ELSE 1 END AS 
+                currency_rate,
+
                 partner.id AS partner_id,
                 partner.name AS partner_name,
                 partner.display_name AS english_name
@@ -156,6 +162,7 @@ class ReportSaleOrderUndelivered(models.Model):
             self._field_column('outstanding_quantity', name=_("Outstanding Quantity")),
             self._field_column('currency_name', name=_("Currency")),
             self._field_column('unit_price', name=_("Unit Price")),
+            self._field_column('discount', name=_('Discount')),
             self._field_column('amount_currency', name=_("Original Invoice Amount")),
             self._field_column('amount', name=_("Amount")),
             self._field_column('outstanding_currency', name=_("Outstanding in Currency")),
