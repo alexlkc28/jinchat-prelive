@@ -20,7 +20,7 @@ class ReportSaleOrderUndelivered(models.Model):
 
     analytic_tag_ids = fields.Integer()
     move_id = fields.Many2one('sale.order')
-	parent_state = fields.Char("Parent State")
+    parent_state = fields.Char("Parent State")
     order_id = fields.Integer()
     order_no = fields.Char(group_operator='max')
     partner_id = fields.Many2one('res.partner')
