@@ -7,7 +7,7 @@
 	'summary': 'Account Customize Report',
 	'description': """Account Customize Report""",
 	'license': "OPL-1",
-	'depends': ['account', 'account_reports', 'sale'],
+	'depends': ['account', 'account_reports', 'sale','studio_customization'],
 	'data': [
 		'security/ir.model.access.csv',
 		'views/report_financial.xml',
