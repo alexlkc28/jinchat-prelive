@@ -2,7 +2,7 @@
 {
 	'name': 'Account Customize Report',
 	'author': 'Youaddon',
-	'version': '15.0.0.0',
+	'version': '15.0.0.1',
 	'live_test_url': ' ',
 	'summary': 'Account Customize Report',
 	'description': """Account Customize Report""",
